@@ -1,0 +1,2742 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "metadata": "Data Factory name",
+            "defaultValue": "adf-data-1"
+        },
+        "AzureBlobStorage1_connectionString": {
+            "type": "secureString",
+            "metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+        },
+        "SourceSqlDB_password": {
+            "type": "secureString",
+            "metadata": "Secure string for 'password' of 'SourceSqlDB'"
+        },
+        "TargetSqlDB_password": {
+            "type": "secureString",
+            "metadata": "Secure string for 'password' of 'TargetSqlDB'"
+        },
+        "AzureSqlDatabase1_password": {
+            "type": "secureString",
+            "metadata": "Secure string for 'password' of 'AzureSqlDatabase1'"
+        },
+        "SourceSqlDB_properties_typeProperties_server": {
+            "type": "string",
+            "defaultValue": "bcbs1.database.windows.net"
+        },
+        "SourceSqlDB_properties_typeProperties_database": {
+            "type": "string",
+            "defaultValue": "ADF_TEST"
+        },
+        "SourceSqlDB_properties_typeProperties_userName": {
+            "type": "string",
+            "defaultValue": "sumanadmin"
+        },
+        "TargetSqlDB_properties_typeProperties_server": {
+            "type": "string",
+            "defaultValue": "bcbs1.database.windows.net"
+        },
+        "TargetSqlDB_properties_typeProperties_database": {
+            "type": "string",
+            "defaultValue": "ADF_TEST"
+        },
+        "TargetSqlDB_properties_typeProperties_userName": {
+            "type": "string",
+            "defaultValue": "sumanadmin"
+        },
+        "AzureKey_properties_typeProperties_baseUrl": {
+            "type": "string",
+            "defaultValue": "https://admin123.vault.azure.net/"
+        },
+        "AzureSqlDatabase1_properties_typeProperties_server": {
+            "type": "string",
+            "defaultValue": "bcbs1.database.windows.net"
+        },
+        "AzureSqlDatabase1_properties_typeProperties_database": {
+            "type": "string",
+            "defaultValue": "ADF_TEST"
+        },
+        "AzureSqlDatabase1_properties_typeProperties_userName": {
+            "type": "string",
+            "defaultValue": "sumanadmin"
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('factoryName'), '/DataFilter')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "Filter_UM_AUTH",
+                        "type": "ExecuteDataFlow",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "dataflow": {
+                                "referenceName": "Filter_UM_AUTH",
+                                "type": "DataFlowReference",
+                                "parameters": {},
+                                "datasetParameters": {
+                                    "source1": {},
+                                    "sink1": {}
+                                }
+                            },
+                            "staging": {},
+                            "compute": {
+                                "coreCount": 8,
+                                "computeType": "General"
+                            },
+                            "traceLevel": "Fine"
+                        }
+                    }
+                ],
+                "policy": {
+                    "elapsedTimeMetric": {}
+                },
+                "annotations": [],
+                "lastPublishTime": "2026-04-20T15:03:21Z"
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/dataflows/Filter_UM_AUTH')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/GCD')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "Diagnosis",
+                        "type": "SqlServerStoredProcedure",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "storedProcedureName": "[[dbo].[sp_load_diagnosis]"
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureSqlDatabase1",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "careteam",
+                        "type": "SqlServerStoredProcedure",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "storedProcedureName": "[[dbo].[sp_load_careteam]"
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureSqlDatabase1",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "careplan",
+                        "type": "SqlServerStoredProcedure",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "storedProcedureName": "[[dbo].[sp_load_careplan]"
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureSqlDatabase1",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "family_circle",
+                        "type": "SqlServerStoredProcedure",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "storedProcedureName": "[[dbo].[sp_load_family_circle]"
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureSqlDatabase1",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "family_history",
+                        "type": "SqlServerStoredProcedure",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "storedProcedureName": "[[dbo].[sp_load_family_history]"
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureSqlDatabase1",
+                            "type": "LinkedServiceReference"
+                        }
+                    }
+                ],
+                "policy": {
+                    "elapsedTimeMetric": {}
+                },
+                "annotations": [],
+                "lastPublishTime": "2026-04-23T15:16:31Z"
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/PL_Full_Load_MedicalClaims')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "TruncateMedicalClaims",
+                        "type": "Script",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "linkedServiceName": {
+                            "referenceName": "AzureSqlDatabase1",
+                            "type": "LinkedServiceReference"
+                        },
+                        "typeProperties": {
+                            "scripts": [
+                                {
+                                    "type": "NonQuery",
+                                    "text": "TRUNCATE TABLE dbo.medical_claims;"
+                                }
+                            ],
+                            "scriptBlockExecutionTimeout": "02:00:00"
+                        }
+                    },
+                    {
+                        "name": "CopyMedicalClaims",
+                        "type": "Copy",
+                        "dependsOn": [
+                            {
+                                "activity": "TruncateMedicalClaims",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "AzureSqlSource",
+                                "additionalColumns": [
+                                    {
+                                        "name": "adf_pipeline_run_id",
+                                        "value": {
+                                            "value": "@pipeline().RunId",
+                                            "type": "Expression"
+                                        }
+                                    }
+                                ],
+                                "sqlReaderQuery": "WITH CTE AS (select *, ROW_NUMBER() over (partition by claim_id, claim_line_id ORDER BY CLAIM_FACT_KEY DESC) AS RN from (\nSELECT\n\n    distinct c.CLAIM_HCC_ID                                              AS claim_id,\n    l.CLAIM_LINE_HCC_ID                                         AS claim_line_id,\n        c.CLAIM_FACT_KEY                                            AS CLAIM_FACT_KEY,\n\n    'claim'                                                     AS claim_use,\n    CAST('true' AS VARCHAR(5))                                  AS insurance_focal,\n\n    c.CLAIM_TYPE_NAME                                           AS claim_type,\n    c.CLAIM_FILING_CODE                                         AS claim_type_code,\n    c.TYPE_OF_BILL_CODE                                         AS BILLING_FACILITY_TYPE,\n    psc.PAYMENT_STATUS_CODE                                     AS claim_payment_status,\n\n    m.MEMBER_HCC_ID                                             AS local_member_id,\n    mem.MEMBER_FIRST_NAME                                       AS first_name,\n    mem.MEMBER_LAST_NAME                                        AS last_name,\n    m.MEMBER_GENDER_CODE                                        AS gender,\n    dd_bd.DATE_NAME_2                                           AS birth_date,\n\n    dd_entry.DATE_NAME_2                                        AS source_record_date,\n    dd_receipt.DATE_NAME_2                                      AS claim_submission_date,\n    dd_adjud.DATE_NAME_2                                        AS claim_adjudication_date,\n    dd_pay.DATE_NAME_2                                          AS claim_payment_date,\n    pf.PROCESSING_DATE_TIME                                     AS claim_processing_date,\n    dd_stmt_s.DATE_NAME_2                                       AS first_date_of_header_service,\n    dd_stmt_e.DATE_NAME_2                                       AS last_date_of_header_service,\n    dd_svc_s.DATE_NAME_2                                        AS first_date_of_line_service,\n    dd_svc_e.DATE_NAME_2                                        AS last_date_of_line_service,\n    c.ADMIT_TIME                                                AS admit_date,\n    c.DISCHARGE_TIME                                            AS discharge_date,\n    dd_eff.DATE_NAME_2                                          AS active_since_date,\n    dd_term.DATE_NAME_2                                         AS active_till_date,\n\n    c.ADMIT_DIAGNOSIS_CODE                                      AS diagnosis,\n    clf.SERVICE_CODE                                            AS procedure_code,\n    clf.PLACE_OF_SERVICE_CODE                                   AS place_of_service,\n    clf_mod.MODIFIER_CODE                                       AS primary_procedure_modifier_code,\n    l.REVENUE_CODE                                              AS revenue_center_code,\n    esygrp.FAC_FLAG                                             AS claim_facility_type,\n    CAST(c.CALCULATED_DRG_KEY AS VARCHAR(20))                   AS drg_code,\n\n    atc.ADMIT_TYPE_CODE                                         AS admission_type,\n    atc.ADMIT_TYPE_NAME                                         AS admission_type_name,\n    asc_t.ADMIT_SOURCE_CODE                                     AS admit_source_code,\n    asc_t.ADMIT_SOURCE_NAME                                     AS admit_source_name,\n\n    bp.BENEFIT_PLAN_HCC_ID                                      AS payer_id,\n    bp.BENEFIT_PLAN_NAME                                        AS payer_name,\n    bp.BENEFIT_PLAN_HCC_ID                                      AS plan_id,\n    bp.BENEFIT_PLAN_NAME                                        AS plan_name,\n    bptc.BENEFIT_PLAN_TYPE_DESC                                 AS plan_type,\n\n    c.SUPPLIER_KEY                                              AS servicing_provider_key,\n    c.SI_SUPPLIER_NPI                                           AS servicing_provider_npi,\n    c.SI_SUPPLIER_TIN                                           AS tax_id,\n    sup.SUPPLIER_NAME                                           AS tax_org_name,\n\n    l.SI_ORDERING_PRACT_NPI                                     AS ordering_provider_npi,\n    l.ORDERING_PRACTITIONER_KEY                                 AS ordering_provider_key,\n    c.ATTENDING_PRACTITIONER_KEY                                AS attending_provider_key,\n\n    SUM(l.BILLED_AMOUNT)            OVER (PARTITION BY c.CLAIM_FACT_KEY) AS total_claim_amount,\n    SUM(l.BASE_PAID_AMOUNT)         OVER (PARTITION BY c.CLAIM_FACT_KEY) AS total_insurance_paid_amount,\n    SUM(l.BASE_ALLOWED_AMOUNT)      OVER (PARTITION BY c.CLAIM_FACT_KEY) AS allowed_amount_header,\n    SUM(fcl.BASE_COPAY_AMOUNT)      OVER (PARTITION BY c.CLAIM_FACT_KEY) AS co_pay,\n    SUM(fcl.BASE_COINSURANCE_AMOUNT) OVER (PARTITION BY c.CLAIM_FACT_KEY) AS coinsurance_amount,\n    SUM(fcl.BASE_NON_COVERED_AMOUNT) OVER (PARTITION BY c.CLAIM_FACT_KEY) AS noncovered_amount,\n    SUM(l.OTHER_DISCOUNT_AMOUNT)    OVER (PARTITION BY c.CLAIM_FACT_KEY) AS discount_amount,\n    cpf.PAYABLE_AMOUNT                                          AS BENEFIT_PAYABLE,\n    scob.EOB_AMNTS_DISTRIBUTED                                  AS cob_amount,\n    scob.DEDUCTIBLE_AMOUNT                                      AS deductible,\n\n    l.BILLED_AMOUNT                                             AS line_claim_amount,\n    l.BASE_ALLOWED_AMOUNT                                       AS allowed_amount,\n    l.BASE_ALLOWED_AMOUNT                                       AS line_eligible_amount,\n    l.BASE_PAID_AMOUNT                                          AS line_insurance_paid_amount,\n    l.BASE_PAID_AMOUNT                                          AS line_paidtoprovider_amount,\n    l.NET_MEMBER_RESP_AMOUNT                                    AS line_member_paid_amount,\n    l.BASE_MEMBER_RESP_AMOUNT                                   AS line_memberliability_amount,\n    l.BASE_MEMBER_RESP_AMOUNT                                   AS line_paidbypatient_amount,\n    l.OTHER_DISCOUNT_AMOUNT                                     AS line_discount_amount,\n    fcl.BASE_COPAY_AMOUNT                                       AS line_co_pay,\n    fcl.BASE_COINSURANCE_AMOUNT                                 AS line_coinsurance_pay,\n    fcl.BASE_DEDUCTIBLE_AMOUNT                                  AS line_deductible,\n    fcl.BASE_NON_COVERED_AMOUNT                                 AS line_noncovered_amount,\n    scob.PAID_AMOUNT                                            AS line_cob_paid_amount,\n    scob.EOB_AMNTS_DISTRIBUTED                                  AS line_priorpayerpaid_amount,\n\n    acrf.CLAIM_DENY_REASON_ID                                   AS denial_reason_code,\n    acrf.CLAIM_DENY_REASON_ID                                   AS line_denial_reason_code,\n    l.DENIAL_MSG_CD_KEY                                         AS denial_reason_description_key,\n\n    barc.BILLING_ADJ_REASON_DESC                                AS adjustment_reason,\n    aah.ACCOUNT_STATUS                                          AS adjustment_status,\n\n    ptc.PAYMENT_TYPE_CODE                                       AS payee_type,\n\n    bgt.TRANSACTION_ID                                          AS transaction_id\n\nFROM       dbo.ALL_CLAIM_LINE_FACT                                    l\n\nINNER JOIN (select * from dbo.ALL_CLAIM_FACT where CLAIM_TYPE_NAME NOT LIKE '%Dental%' )          c\n        ON c.CLAIM_FACT_KEY                      = l.CLAIM_FACT_KEY\n\nLEFT  JOIN (select * from dbo.ALL_MEMBER_VERSION_HIST_FACT )          m\n        ON m.MEMBER_KEY                     = c.MEMBER_KEY\nLEFT  JOIN (select * from dbo.MEMBER)                                 mem\n        ON mem.MEMBER_KEY                   = c.MEMBER_KEY\n\nLEFT  JOIN (select * from dbo.BENEFIT_PLAN_HISTORY_FACT  )            bp\n        ON bp.BENEFIT_PLAN_KEY              = l.BENEFIT_PLAN_KEY\nLEFT  JOIN (select * from dbo.OTHER_INSURANCE_COVERAGE )              oic\n        ON oic.MEMBER_KEY                   = c.MEMBER_KEY\nLEFT  JOIN (select * from dbo.BENEFIT_PLAN_TYPE_CODE )                bptc\n        ON bptc.BENEFIT_PLAN_TYPE_KEY       = oic.BENEFIT_PLAN_TYPE_KEY\n\nLEFT  JOIN (select * from dbo.CLAIM_ADMIT_TYPE_CODE )                 atc\n        ON atc.ADMIT_TYPE_KEY               = c.ADMIT_TYPE_KEY\nLEFT  JOIN (select * from dbo.CLAIM_ADMIT_SOURCE_CODE )               asc_t\n        ON asc_t.ADMIT_SOURCE_KEY           = c.ADMIT_SOURCE_KEY\n\nLEFT  JOIN dbo.SUPPLIER                                               sup\n        ON sup.SUPPLIER_KEY                 = c.SUPPLIER_KEY\n\nLEFT  JOIN (select * from dbo.CLAIM_LINE_FACT )                       clf\n        ON clf.CLAIM_LINE_FACT_KEY          = l.CLAIM_LINE_FACT_KEY\nLEFT  JOIN (select * from dbo.CLAIM_LINE_FACT_TO_MODIFIER)            clf_mod\n        ON clf_mod.CLAIM_LINE_FACT_KEY      = l.CLAIM_LINE_FACT_KEY\nLEFT  JOIN (select * from dbo.FINAL_CLAIM_LINE_FACT )                 fcl\n        ON fcl.CLAIM_LINE_FACT_KEY          = l.CLAIM_LINE_FACT_KEY\n\nLEFT  JOIN (\n    SELECT * FROM (\n        SELECT *,\n            ROW_NUMBER() OVER (PARTITION BY PAYMENT_FACT_KEY ORDER BY PAYMENT_DATE_KEY DESC) AS rn_pk,\n            ROW_NUMBER() OVER (PARTITION BY MEMBER_KEY       ORDER BY PAYMENT_DATE_KEY DESC) AS rn_mem\n        FROM dbo.PAYMENT_FACT\n    ) pf_inner\n    WHERE rn_pk = 1 AND rn_mem = 1\n)                                                                      pf\n        ON pf.MEMBER_KEY                    = c.MEMBER_KEY\nLEFT  JOIN dbo.PAYMENT_STATUS_CODE                                     psc\n        ON psc.PAYMENT_STATUS_CODE          = pf.PAYMENT_STATUS_CODE\nLEFT  JOIN (select * from dbo.PAYMENT_TYPE_CODE )                      ptc\n        ON ptc.PAYMENT_TYPE_KEY             = pf.PAYMENT_TYPE_KEY\n\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_entry\n        ON dd_entry.DATE_KEY                = c.ENTRY_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_receipt\n        ON dd_receipt.DATE_KEY              = c.RECEIPT_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_adjud\n        ON dd_adjud.DATE_KEY                = c.MOST_RECENT_PROCESS_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_stmt_s\n        ON dd_stmt_s.DATE_KEY               = c.STATEMENT_START_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_stmt_e\n        ON dd_stmt_e.DATE_KEY               = c.STATEMENT_END_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_svc_s\n        ON dd_svc_s.DATE_KEY                = l.SERVICE_START_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_svc_e\n        ON dd_svc_e.DATE_KEY                = l.SERVICE_END_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_bd\n        ON dd_bd.DATE_KEY                   = m.MEMBER_BIRTH_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_pay\n        ON dd_pay.DATE_KEY                  = pf.PAYMENT_DATE_KEY\n\nLEFT  JOIN (select * from dbo.ALL_ACCOUNT_HISTORY_FACT )               aah\n        ON aah.ACCOUNT_KEY                  = l.ACCOUNT_KEY\nLEFT  JOIN (select * from dbo.DATE_DIMENSION )                         dd_eff\n        ON dd_eff.DATE_KEY                  = aah.ACCOUNT_EFFECTIVE_DATE_KEY\nLEFT  JOIN (select * from dbo.DATE_DIMENSION )                         dd_term\n        ON dd_term.DATE_KEY                 = aah.ACCOUNT_TERMINATION_DATE_KEY\n\nLEFT  JOIN (select * from dbo.SUBMITTED_COB_PAYMENT_FACT )             scob\n        ON scob.CLAIM_FACT_KEY              = c.CLAIM_FACT_KEY\n\nLEFT  JOIN (select * from dbo.CLAIM_PAYABLE_FACT )                     cpf\n        ON cpf.CLAIM_FACT_KEY               = c.CLAIM_FACT_KEY\n\nLEFT  JOIN dbo.ACCOUNT_CLAIM_REVIEW_FACT                               acrf\n        ON acrf.ACCOUNT_KEY                 = l.ACCOUNT_KEY\n\nLEFT  JOIN (select * from dbo.ALL_BILLING_ADJUSTMENT_FACT )            abaf\n        ON abaf.MEMBER_KEY                  = c.MEMBER_KEY\nLEFT  JOIN (select * from dbo.BILLING_ADJ_REASON_CODE )                barc\n        ON barc.BILLING_ADJ_REASON_KEY      = abaf.BILLING_ADJ_REASON_KEY\n\nLEFT  JOIN dbo.ESYGRP_PHYSICIAN_LINE_RES                               esygrp\n        ON esygrp.ESYGRP_PHYSICIAN_LINE_RES_KEY = l.ESYGRP_PHYSICIAN_LINE_RES_KEY\n\nLEFT  JOIN (select * from dbo.BURGESS_CLM_RES )                        bgt\n        ON bgt.BURGESS_CLM_RES_KEY          = c.BURGESS_CLM_RES_KEY\n)x\n)\nSELECT\n    claim_id, claim_line_id, CLAIM_FACT_KEY,\n    claim_use, insurance_focal,\n    claim_type, claim_type_code, BILLING_FACILITY_TYPE, claim_payment_status,\n    local_member_id, first_name, last_name, gender, birth_date,\n    source_record_date, claim_submission_date, claim_adjudication_date,\n    claim_payment_date, claim_processing_date,\n    first_date_of_header_service, last_date_of_header_service,\n    first_date_of_line_service, last_date_of_line_service,\n    admit_date, discharge_date, active_since_date, active_till_date,\n    diagnosis, procedure_code, place_of_service,\n    primary_procedure_modifier_code, revenue_center_code,\n    claim_facility_type, drg_code,\n    admission_type, admission_type_name, admit_source_code, admit_source_name,\n    payer_id, payer_name, plan_id, plan_name, plan_type,\n    servicing_provider_key, servicing_provider_npi,\n    tax_id, tax_org_name, ordering_provider_npi,\n    ordering_provider_key, attending_provider_key,\n    total_claim_amount, total_insurance_paid_amount, allowed_amount_header,\n    co_pay, coinsurance_amount, noncovered_amount, discount_amount,\n    BENEFIT_PAYABLE, cob_amount, deductible,\n    line_claim_amount, allowed_amount, line_eligible_amount,\n    line_insurance_paid_amount, line_paidtoprovider_amount,\n    line_member_paid_amount, line_memberliability_amount,\n    line_paidbypatient_amount, line_discount_amount,\n    line_co_pay, line_coinsurance_pay, line_deductible,\n    line_noncovered_amount, line_cob_paid_amount, line_priorpayerpaid_amount,\n    denial_reason_code, line_denial_reason_code, denial_reason_description_key,\n    adjustment_reason, adjustment_status, payee_type, transaction_id\nFROM CTE\nWHERE RN = 1",
+                                "queryTimeout": "02:00:00",
+                                "partitionOption": "None"
+                            },
+                            "sink": {
+                                "type": "AzureSqlSink",
+                                "writeBehavior": "insert",
+                                "sqlWriterUseTableLock": false
+                            },
+                            "enableStaging": false,
+                            "translator": {
+                                "type": "TabularTranslator",
+                                "typeConversion": true,
+                                "typeConversionSettings": {
+                                    "allowDataTruncation": true,
+                                    "treatBooleanAsNumber": false
+                                }
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "DS_MedicalClaims_View",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "DS_MedicalClaims_Target",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "ValidateRowCount",
+                        "type": "Script",
+                        "dependsOn": [
+                            {
+                                "activity": "CopyMedicalClaims",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "linkedServiceName": {
+                            "referenceName": "AzureSqlDatabase1",
+                            "type": "LinkedServiceReference"
+                        },
+                        "typeProperties": {
+                            "scripts": [
+                                {
+                                    "type": "Query",
+                                    "text": "SELECT COUNT(*) AS loaded_rows,\n       COUNT(DISTINCT claim_id) AS distinct_claims\nFROM dbo.medical_claims;"
+                                }
+                            ],
+                            "scriptBlockExecutionTimeout": "02:00:00"
+                        }
+                    }
+                ],
+                "policy": {
+                    "elapsedTimeMetric": {}
+                },
+                "annotations": [],
+                "lastPublishTime": "2026-05-11T13:39:50Z"
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]",
+                "[concat(variables('factoryId'), '/datasets/DS_MedicalClaims_View')]",
+                "[concat(variables('factoryId'), '/datasets/DS_MedicalClaims_Target')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/PL_Incremental_MedicalClaims')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "LookupRunLog",
+                        "type": "Lookup",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "AzureSqlSource",
+                                "sqlReaderQuery": "SELECT last_load_datetime\nFROM dbo.pipeline_run_log\nWHERE pipeline_name = 'PL_Incremental_MedicalClaims'",
+                                "queryTimeout": "02:00:00",
+                                "partitionOption": "None"
+                            },
+                            "dataset": {
+                                "referenceName": "DS_RunLog",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        }
+                    },
+                    {
+                        "name": "UpdateRunLog",
+                        "type": "Script",
+                        "dependsOn": [
+                            {
+                                "activity": "MergeIntoClaims",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "linkedServiceName": {
+                            "referenceName": "AzureSqlDatabase1",
+                            "type": "LinkedServiceReference"
+                        },
+                        "typeProperties": {
+                            "scripts": [
+                                {
+                                    "type": "NonQuery",
+                                    "text": {
+                                        "value": "@concat('UPDATE dbo.pipeline_watermark SET last_load_datetime = ''',\n        formatDateTime(utcNow(), 'yyyy-MM-dd HH:mm:ss'),\n        ''', updated_at = GETUTCDATE() WHERE pipeline_name = ''PL_Incremental_MedicalClaims''')",
+                                        "type": "Expression"
+                                    }
+                                }
+                            ],
+                            "scriptBlockExecutionTimeout": "02:00:00"
+                        }
+                    },
+                    {
+                        "name": "TruncateStaging",
+                        "type": "Script",
+                        "dependsOn": [
+                            {
+                                "activity": "LookupRunLog",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "linkedServiceName": {
+                            "referenceName": "AzureSqlDatabase1",
+                            "type": "LinkedServiceReference"
+                        },
+                        "typeProperties": {
+                            "scripts": [
+                                {
+                                    "type": "Query",
+                                    "text": "TRUNCATE TABLE dbo.medical_claims_staging;"
+                                }
+                            ],
+                            "scriptBlockExecutionTimeout": "02:00:00"
+                        }
+                    },
+                    {
+                        "name": "CopyToStaging",
+                        "type": "Copy",
+                        "dependsOn": [
+                            {
+                                "activity": "TruncateStaging",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "AzureSqlSource",
+                                "sqlReaderQuery": {
+                                    "value": "WITH CTE AS (select *, ROW_NUMBER() over (partition by claim_id, claim_line_id ORDER BY CLAIM_FACT_KEY DESC) AS RN from (\nSELECT\n\n    distinct c.CLAIM_HCC_ID                                              AS claim_id,\n    l.CLAIM_LINE_HCC_ID                                         AS claim_line_id,\n        c.CLAIM_FACT_KEY                                            AS CLAIM_FACT_KEY,\n\n    'claim'                                                     AS claim_use,\n    CAST('true' AS VARCHAR(5))                                  AS insurance_focal,\n\n    c.CLAIM_TYPE_NAME                                           AS claim_type,\n    c.CLAIM_FILING_CODE                                         AS claim_type_code,\n    c.TYPE_OF_BILL_CODE                                         AS BILLING_FACILITY_TYPE,\n    psc.PAYMENT_STATUS_CODE                                     AS claim_payment_status,\n\n    m.MEMBER_HCC_ID                                             AS local_member_id,\n    mem.MEMBER_FIRST_NAME                                       AS first_name,\n    mem.MEMBER_LAST_NAME                                        AS last_name,\n    m.MEMBER_GENDER_CODE                                        AS gender,\n    dd_bd.DATE_NAME_2                                           AS birth_date,\n\n    dd_entry.DATE_NAME_2                                        AS source_record_date,\n    dd_receipt.DATE_NAME_2                                      AS claim_submission_date,\n    dd_adjud.DATE_NAME_2                                        AS claim_adjudication_date,\n    dd_pay.DATE_NAME_2                                          AS claim_payment_date,\n    pf.PROCESSING_DATE_TIME                                     AS claim_processing_date,\n    dd_stmt_s.DATE_NAME_2                                       AS first_date_of_header_service,\n    dd_stmt_e.DATE_NAME_2                                       AS last_date_of_header_service,\n    dd_svc_s.DATE_NAME_2                                        AS first_date_of_line_service,\n    dd_svc_e.DATE_NAME_2                                        AS last_date_of_line_service,\n    c.ADMIT_TIME                                                AS admit_date,\n    c.DISCHARGE_TIME                                            AS discharge_date,\n    dd_eff.DATE_NAME_2                                          AS active_since_date,\n    dd_term.DATE_NAME_2                                         AS active_till_date,\n\n    c.ADMIT_DIAGNOSIS_CODE                                      AS diagnosis,\n    clf.SERVICE_CODE                                            AS procedure_code,\n    clf.PLACE_OF_SERVICE_CODE                                   AS place_of_service,\n    clf_mod.MODIFIER_CODE                                       AS primary_procedure_modifier_code,\n    l.REVENUE_CODE                                              AS revenue_center_code,\n    esygrp.FAC_FLAG                                             AS claim_facility_type,\n    CAST(c.CALCULATED_DRG_KEY AS VARCHAR(20))                   AS drg_code,\n\n    atc.ADMIT_TYPE_CODE                                         AS admission_type,\n    atc.ADMIT_TYPE_NAME                                         AS admission_type_name,\n    asc_t.ADMIT_SOURCE_CODE                                     AS admit_source_code,\n    asc_t.ADMIT_SOURCE_NAME                                     AS admit_source_name,\n\n    bp.BENEFIT_PLAN_HCC_ID                                      AS payer_id,\n    bp.BENEFIT_PLAN_NAME                                        AS payer_name,\n    bp.BENEFIT_PLAN_HCC_ID                                      AS plan_id,\n    bp.BENEFIT_PLAN_NAME                                        AS plan_name,\n    bptc.BENEFIT_PLAN_TYPE_DESC                                 AS plan_type,\n\n    c.SUPPLIER_KEY                                              AS servicing_provider_key,\n    c.SI_SUPPLIER_NPI                                           AS servicing_provider_npi,\n    c.SI_SUPPLIER_TIN                                           AS tax_id,\n    sup.SUPPLIER_NAME                                           AS tax_org_name,\n\n    l.SI_ORDERING_PRACT_NPI                                     AS ordering_provider_npi,\n    l.ORDERING_PRACTITIONER_KEY                                 AS ordering_provider_key,\n    c.ATTENDING_PRACTITIONER_KEY                                AS attending_provider_key,\n\n    SUM(l.BILLED_AMOUNT)            OVER (PARTITION BY c.CLAIM_FACT_KEY) AS total_claim_amount,\n    SUM(l.BASE_PAID_AMOUNT)         OVER (PARTITION BY c.CLAIM_FACT_KEY) AS total_insurance_paid_amount,\n    SUM(l.BASE_ALLOWED_AMOUNT)      OVER (PARTITION BY c.CLAIM_FACT_KEY) AS allowed_amount_header,\n    SUM(fcl.BASE_COPAY_AMOUNT)      OVER (PARTITION BY c.CLAIM_FACT_KEY) AS co_pay,\n    SUM(fcl.BASE_COINSURANCE_AMOUNT) OVER (PARTITION BY c.CLAIM_FACT_KEY) AS coinsurance_amount,\n    SUM(fcl.BASE_NON_COVERED_AMOUNT) OVER (PARTITION BY c.CLAIM_FACT_KEY) AS noncovered_amount,\n    SUM(l.OTHER_DISCOUNT_AMOUNT)    OVER (PARTITION BY c.CLAIM_FACT_KEY) AS discount_amount,\n    cpf.PAYABLE_AMOUNT                                          AS BENEFIT_PAYABLE,\n    scob.EOB_AMNTS_DISTRIBUTED                                  AS cob_amount,\n    scob.DEDUCTIBLE_AMOUNT                                      AS deductible,\n\n    l.BILLED_AMOUNT                                             AS line_claim_amount,\n    l.BASE_ALLOWED_AMOUNT                                       AS allowed_amount,\n    l.BASE_ALLOWED_AMOUNT                                       AS line_eligible_amount,\n    l.BASE_PAID_AMOUNT                                          AS line_insurance_paid_amount,\n    l.BASE_PAID_AMOUNT                                          AS line_paidtoprovider_amount,\n    l.NET_MEMBER_RESP_AMOUNT                                    AS line_member_paid_amount,\n    l.BASE_MEMBER_RESP_AMOUNT                                   AS line_memberliability_amount,\n    l.BASE_MEMBER_RESP_AMOUNT                                   AS line_paidbypatient_amount,\n    l.OTHER_DISCOUNT_AMOUNT                                     AS line_discount_amount,\n    fcl.BASE_COPAY_AMOUNT                                       AS line_co_pay,\n    fcl.BASE_COINSURANCE_AMOUNT                                 AS line_coinsurance_pay,\n    fcl.BASE_DEDUCTIBLE_AMOUNT                                  AS line_deductible,\n    fcl.BASE_NON_COVERED_AMOUNT                                 AS line_noncovered_amount,\n    scob.PAID_AMOUNT                                            AS line_cob_paid_amount,\n    scob.EOB_AMNTS_DISTRIBUTED                                  AS line_priorpayerpaid_amount,\n\n    acrf.CLAIM_DENY_REASON_ID                                   AS denial_reason_code,\n    acrf.CLAIM_DENY_REASON_ID                                   AS line_denial_reason_code,\n    l.DENIAL_MSG_CD_KEY                                         AS denial_reason_description_key,\n\n    barc.BILLING_ADJ_REASON_DESC                                AS adjustment_reason,\n    aah.ACCOUNT_STATUS                                          AS adjustment_status,\n\n    ptc.PAYMENT_TYPE_CODE                                       AS payee_type,\n\n    bgt.TRANSACTION_ID                                          AS transaction_id\n\nFROM       dbo.ALL_CLAIM_LINE_FACT                                    l\n\nINNER JOIN (select * from dbo.ALL_CLAIM_FACT where CLAIM_TYPE_NAME NOT LIKE '%Dental%' )          c\n        ON c.CLAIM_FACT_KEY                      = l.CLAIM_FACT_KEY\n\nLEFT  JOIN (select * from dbo.ALL_MEMBER_VERSION_HIST_FACT )          m\n        ON m.MEMBER_KEY                     = c.MEMBER_KEY\nLEFT  JOIN (select * from dbo.MEMBER)                                 mem\n        ON mem.MEMBER_KEY                   = c.MEMBER_KEY\n\nLEFT  JOIN (select * from dbo.BENEFIT_PLAN_HISTORY_FACT  )            bp\n        ON bp.BENEFIT_PLAN_KEY              = l.BENEFIT_PLAN_KEY\nLEFT  JOIN (select * from dbo.OTHER_INSURANCE_COVERAGE )              oic\n        ON oic.MEMBER_KEY                   = c.MEMBER_KEY\nLEFT  JOIN (select * from dbo.BENEFIT_PLAN_TYPE_CODE )                bptc\n        ON bptc.BENEFIT_PLAN_TYPE_KEY       = oic.BENEFIT_PLAN_TYPE_KEY\n\nLEFT  JOIN (select * from dbo.CLAIM_ADMIT_TYPE_CODE )                 atc\n        ON atc.ADMIT_TYPE_KEY               = c.ADMIT_TYPE_KEY\nLEFT  JOIN (select * from dbo.CLAIM_ADMIT_SOURCE_CODE )               asc_t\n        ON asc_t.ADMIT_SOURCE_KEY           = c.ADMIT_SOURCE_KEY\n\nLEFT  JOIN dbo.SUPPLIER                                               sup\n        ON sup.SUPPLIER_KEY                 = c.SUPPLIER_KEY\n\nLEFT  JOIN (select * from dbo.CLAIM_LINE_FACT )                       clf\n        ON clf.CLAIM_LINE_FACT_KEY          = l.CLAIM_LINE_FACT_KEY\nLEFT  JOIN (select * from dbo.CLAIM_LINE_FACT_TO_MODIFIER)            clf_mod\n        ON clf_mod.CLAIM_LINE_FACT_KEY      = l.CLAIM_LINE_FACT_KEY\nLEFT  JOIN (select * from dbo.FINAL_CLAIM_LINE_FACT )                 fcl\n        ON fcl.CLAIM_LINE_FACT_KEY          = l.CLAIM_LINE_FACT_KEY\n\nLEFT  JOIN (\n    SELECT * FROM (\n        SELECT *,\n            ROW_NUMBER() OVER (PARTITION BY PAYMENT_FACT_KEY ORDER BY PAYMENT_DATE_KEY DESC) AS rn_pk,\n            ROW_NUMBER() OVER (PARTITION BY MEMBER_KEY       ORDER BY PAYMENT_DATE_KEY DESC) AS rn_mem\n        FROM dbo.PAYMENT_FACT\n    ) pf_inner\n    WHERE rn_pk = 1 AND rn_mem = 1\n)                                                                      pf\n        ON pf.MEMBER_KEY                    = c.MEMBER_KEY\nLEFT  JOIN dbo.PAYMENT_STATUS_CODE                                     psc\n        ON psc.PAYMENT_STATUS_CODE          = pf.PAYMENT_STATUS_CODE\nLEFT  JOIN (select * from dbo.PAYMENT_TYPE_CODE )                      ptc\n        ON ptc.PAYMENT_TYPE_KEY             = pf.PAYMENT_TYPE_KEY\n\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_entry\n        ON dd_entry.DATE_KEY                = c.ENTRY_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_receipt\n        ON dd_receipt.DATE_KEY              = c.RECEIPT_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_adjud\n        ON dd_adjud.DATE_KEY                = c.MOST_RECENT_PROCESS_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_stmt_s\n        ON dd_stmt_s.DATE_KEY               = c.STATEMENT_START_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_stmt_e\n        ON dd_stmt_e.DATE_KEY               = c.STATEMENT_END_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_svc_s\n        ON dd_svc_s.DATE_KEY                = l.SERVICE_START_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_svc_e\n        ON dd_svc_e.DATE_KEY                = l.SERVICE_END_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_bd\n        ON dd_bd.DATE_KEY                   = m.MEMBER_BIRTH_DATE_KEY\nLEFT  JOIN dbo.DATE_DIMENSION                                          dd_pay\n        ON dd_pay.DATE_KEY                  = pf.PAYMENT_DATE_KEY\n\nLEFT  JOIN (select * from dbo.ALL_ACCOUNT_HISTORY_FACT )               aah\n        ON aah.ACCOUNT_KEY                  = l.ACCOUNT_KEY\nLEFT  JOIN (select * from dbo.DATE_DIMENSION )                         dd_eff\n        ON dd_eff.DATE_KEY                  = aah.ACCOUNT_EFFECTIVE_DATE_KEY\nLEFT  JOIN (select * from dbo.DATE_DIMENSION )                         dd_term\n        ON dd_term.DATE_KEY                 = aah.ACCOUNT_TERMINATION_DATE_KEY\n\nLEFT  JOIN (select * from dbo.SUBMITTED_COB_PAYMENT_FACT )             scob\n        ON scob.CLAIM_FACT_KEY              = c.CLAIM_FACT_KEY\n\nLEFT  JOIN (select * from dbo.CLAIM_PAYABLE_FACT )                     cpf\n        ON cpf.CLAIM_FACT_KEY               = c.CLAIM_FACT_KEY\n\nLEFT  JOIN dbo.ACCOUNT_CLAIM_REVIEW_FACT                               acrf\n        ON acrf.ACCOUNT_KEY                 = l.ACCOUNT_KEY\n\nLEFT  JOIN (select * from dbo.ALL_BILLING_ADJUSTMENT_FACT )            abaf\n        ON abaf.MEMBER_KEY                  = c.MEMBER_KEY\nLEFT  JOIN (select * from dbo.BILLING_ADJ_REASON_CODE )                barc\n        ON barc.BILLING_ADJ_REASON_KEY      = abaf.BILLING_ADJ_REASON_KEY\n\nLEFT  JOIN dbo.ESYGRP_PHYSICIAN_LINE_RES                               esygrp\n        ON esygrp.ESYGRP_PHYSICIAN_LINE_RES_KEY = l.ESYGRP_PHYSICIAN_LINE_RES_KEY\n\nLEFT  JOIN (select * from dbo.BURGESS_CLM_RES )                        bgt\n        ON bgt.BURGESS_CLM_RES_KEY          = c.BURGESS_CLM_RES_KEY\n)x\n)\nSELECT\n    claim_id, claim_line_id, CLAIM_FACT_KEY,\n    claim_use, insurance_focal,\n    claim_type, claim_type_code, BILLING_FACILITY_TYPE, claim_payment_status,\n    local_member_id, first_name, last_name, gender, birth_date,\n    source_record_date, claim_submission_date, claim_adjudication_date,\n    claim_payment_date, claim_processing_date,\n    first_date_of_header_service, last_date_of_header_service,\n    first_date_of_line_service, last_date_of_line_service,\n    admit_date, discharge_date, active_since_date, active_till_date,\n    diagnosis, procedure_code, place_of_service,\n    primary_procedure_modifier_code, revenue_center_code,\n    claim_facility_type, drg_code,\n    admission_type, admission_type_name, admit_source_code, admit_source_name,\n    payer_id, payer_name, plan_id, plan_name, plan_type,\n    servicing_provider_key, servicing_provider_npi,\n    tax_id, tax_org_name, ordering_provider_npi,\n    ordering_provider_key, attending_provider_key,\n    total_claim_amount, total_insurance_paid_amount, allowed_amount_header,\n    co_pay, coinsurance_amount, noncovered_amount, discount_amount,\n    BENEFIT_PAYABLE, cob_amount, deductible,\n    line_claim_amount, allowed_amount, line_eligible_amount,\n    line_insurance_paid_amount, line_paidtoprovider_amount,\n    line_member_paid_amount, line_memberliability_amount,\n    line_paidbypatient_amount, line_discount_amount,\n    line_co_pay, line_coinsurance_pay, line_deductible,\n    line_noncovered_amount, line_cob_paid_amount, line_priorpayerpaid_amount,\n    denial_reason_code, line_denial_reason_code, denial_reason_description_key,\n    adjustment_reason, adjustment_status, payee_type, transaction_id\nFROM CTE\nWHERE RN = 1\n  AND (source_record_date IS NULL OR CAST(source_record_date AS DATE) >= CAST((\n    SELECT last_load_datetime\n    FROM   dbo.pipeline_run_log\n    WHERE  pipeline_name = 'PL_Incremental_MedicalClaims'\n) AS DATE))",
+                                    "type": "Expression"
+                                },
+                                "queryTimeout": "02:00:00",
+                                "partitionOption": "None"
+                            },
+                            "sink": {
+                                "type": "AzureSqlSink",
+                                "writeBehavior": "insert",
+                                "sqlWriterUseTableLock": false
+                            },
+                            "enableStaging": false,
+                            "translator": {
+                                "type": "TabularTranslator",
+                                "typeConversion": true,
+                                "typeConversionSettings": {
+                                    "allowDataTruncation": true,
+                                    "treatBooleanAsNumber": false
+                                }
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "DS_MedicalClaims_Staging",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "DS_MedicalClaims_Staging",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ]
+                    },
+                    {
+                        "name": "MergeIntoClaims",
+                        "type": "Script",
+                        "dependsOn": [
+                            {
+                                "activity": "DeduplicateStaging",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "linkedServiceName": {
+                            "referenceName": "AzureSqlDatabase1",
+                            "type": "LinkedServiceReference"
+                        },
+                        "typeProperties": {
+                            "scripts": [
+                                {
+                                    "type": "NonQuery",
+                                    "text": "/* ================================================================\n   INCREMENTAL MERGE — dbo.medical_claims_staging → dbo.medical_claims\n   Used in ADF as Activity 4 (Script / NonQuery)\n   ================================================================\n   WHEN MATCHED          → UPDATE (claim exists, data changed)\n   WHEN NOT MATCHED      → INSERT (new claim not yet in target)\n   NOTE: No DELETE — incremental load only processes changed/new\n         records. Use full MERGE (merge_medical_claims.sql) if\n         DELETE of removed claims is also required.\n   ================================================================ */\n\nMERGE dbo.medical_claims AS target\nUSING dbo.medical_claims_staging AS source\n    ON  target.claim_id      = source.claim_id\n    AND target.claim_line_id = source.claim_line_id\n\nWHEN MATCHED THEN UPDATE SET\n    target.CLAIM_FACT_KEY                  = source.CLAIM_FACT_KEY,\n    target.claim_use                       = source.claim_use,\n    target.insurance_focal                 = source.insurance_focal,\n    target.claim_type                      = source.claim_type,\n    target.claim_type_code                 = source.claim_type_code,\n    target.BILLING_FACILITY_TYPE           = source.BILLING_FACILITY_TYPE,\n    target.claim_payment_status            = source.claim_payment_status,\n    target.local_member_id                 = source.local_member_id,\n    target.first_name                      = source.first_name,\n    target.last_name                       = source.last_name,\n    target.gender                          = source.gender,\n    target.birth_date                      = source.birth_date,\n    target.source_record_date              = source.source_record_date,\n    target.claim_submission_date           = source.claim_submission_date,\n    target.claim_adjudication_date         = source.claim_adjudication_date,\n    target.claim_payment_date              = source.claim_payment_date,\n    target.claim_processing_date           = source.claim_processing_date,\n    target.first_date_of_header_service    = source.first_date_of_header_service,\n    target.last_date_of_header_service     = source.last_date_of_header_service,\n    target.first_date_of_line_service      = source.first_date_of_line_service,\n    target.last_date_of_line_service       = source.last_date_of_line_service,\n    target.admit_date                      = source.admit_date,\n    target.discharge_date                  = source.discharge_date,\n    target.active_since_date               = source.active_since_date,\n    target.active_till_date                = source.active_till_date,\n    target.diagnosis                       = source.diagnosis,\n    target.procedure_code                  = source.procedure_code,\n    target.place_of_service                = source.place_of_service,\n    target.primary_procedure_modifier_code = source.primary_procedure_modifier_code,\n    target.revenue_center_code             = source.revenue_center_code,\n    target.claim_facility_type             = source.claim_facility_type,\n    target.drg_code                        = source.drg_code,\n    target.admission_type                  = source.admission_type,\n    target.admission_type_name             = source.admission_type_name,\n    target.admit_source_code               = source.admit_source_code,\n    target.admit_source_name               = source.admit_source_name,\n    target.payer_id                        = source.payer_id,\n    target.payer_name                      = source.payer_name,\n    target.plan_id                         = source.plan_id,\n    target.plan_name                       = source.plan_name,\n    target.plan_type                       = source.plan_type,\n    target.servicing_provider_key          = source.servicing_provider_key,\n    target.servicing_provider_npi          = source.servicing_provider_npi,\n    target.tax_id                          = source.tax_id,\n    target.tax_org_name                    = source.tax_org_name,\n    target.ordering_provider_npi           = source.ordering_provider_npi,\n    target.ordering_provider_key           = source.ordering_provider_key,\n    target.attending_provider_key          = source.attending_provider_key,\n    target.total_claim_amount              = source.total_claim_amount,\n    target.total_insurance_paid_amount     = source.total_insurance_paid_amount,\n    target.allowed_amount_header           = source.allowed_amount_header,\n    target.co_pay                          = source.co_pay,\n    target.coinsurance_amount              = source.coinsurance_amount,\n    target.noncovered_amount               = source.noncovered_amount,\n    target.discount_amount                 = source.discount_amount,\n    target.BENEFIT_PAYABLE                 = source.BENEFIT_PAYABLE,\n    target.cob_amount                      = source.cob_amount,\n    target.deductible                      = source.deductible,\n    target.line_claim_amount               = source.line_claim_amount,\n    target.allowed_amount                  = source.allowed_amount,\n    target.line_eligible_amount            = source.line_eligible_amount,\n    target.line_insurance_paid_amount      = source.line_insurance_paid_amount,\n    target.line_paidtoprovider_amount      = source.line_paidtoprovider_amount,\n    target.line_member_paid_amount         = source.line_member_paid_amount,\n    target.line_memberliability_amount     = source.line_memberliability_amount,\n    target.line_paidbypatient_amount       = source.line_paidbypatient_amount,\n    target.line_discount_amount            = source.line_discount_amount,\n    target.line_co_pay                     = source.line_co_pay,\n    target.line_coinsurance_pay            = source.line_coinsurance_pay,\n    target.line_deductible                 = source.line_deductible,\n    target.line_noncovered_amount          = source.line_noncovered_amount,\n    target.line_cob_paid_amount            = source.line_cob_paid_amount,\n    target.line_priorpayerpaid_amount      = source.line_priorpayerpaid_amount,\n    target.denial_reason_code              = source.denial_reason_code,\n    target.line_denial_reason_code         = source.line_denial_reason_code,\n    target.denial_reason_description_key   = source.denial_reason_description_key,\n    target.adjustment_reason               = source.adjustment_reason,\n    target.adjustment_status               = source.adjustment_status,\n    target.payee_type                      = source.payee_type,\n    target.transaction_id                  = source.transaction_id,\n    target.adf_load_datetime               = GETUTCDATE()\n\nWHEN NOT MATCHED BY TARGET THEN INSERT (\n    claim_id, claim_line_id, CLAIM_FACT_KEY,\n    claim_use, insurance_focal, claim_type, claim_type_code,\n    BILLING_FACILITY_TYPE, claim_payment_status,\n    local_member_id, first_name, last_name, gender, birth_date,\n    source_record_date, claim_submission_date, claim_adjudication_date,\n    claim_payment_date, claim_processing_date,\n    first_date_of_header_service, last_date_of_header_service,\n    first_date_of_line_service, last_date_of_line_service,\n    admit_date, discharge_date, active_since_date, active_till_date,\n    diagnosis, procedure_code, place_of_service,\n    primary_procedure_modifier_code, revenue_center_code,\n    claim_facility_type, drg_code,\n    admission_type, admission_type_name, admit_source_code, admit_source_name,\n    payer_id, payer_name, plan_id, plan_name, plan_type,\n    servicing_provider_key, servicing_provider_npi,\n    tax_id, tax_org_name, ordering_provider_npi,\n    ordering_provider_key, attending_provider_key,\n    total_claim_amount, total_insurance_paid_amount, allowed_amount_header,\n    co_pay, coinsurance_amount, noncovered_amount, discount_amount,\n    BENEFIT_PAYABLE, cob_amount, deductible,\n    line_claim_amount, allowed_amount, line_eligible_amount,\n    line_insurance_paid_amount, line_paidtoprovider_amount,\n    line_member_paid_amount, line_memberliability_amount,\n    line_paidbypatient_amount, line_discount_amount,\n    line_co_pay, line_coinsurance_pay, line_deductible,\n    line_noncovered_amount, line_cob_paid_amount, line_priorpayerpaid_amount,\n    denial_reason_code, line_denial_reason_code, denial_reason_description_key,\n    adjustment_reason, adjustment_status, payee_type, transaction_id,\n    adf_load_datetime\n) VALUES (\n    source.claim_id, source.claim_line_id, source.CLAIM_FACT_KEY,\n    source.claim_use, source.insurance_focal, source.claim_type, source.claim_type_code,\n    source.BILLING_FACILITY_TYPE, source.claim_payment_status,\n    source.local_member_id, source.first_name, source.last_name, source.gender, source.birth_date,\n    source.source_record_date, source.claim_submission_date, source.claim_adjudication_date,\n    source.claim_payment_date, source.claim_processing_date,\n    source.first_date_of_header_service, source.last_date_of_header_service,\n    source.first_date_of_line_service, source.last_date_of_line_service,\n    source.admit_date, source.discharge_date, source.active_since_date, source.active_till_date,\n    source.diagnosis, source.procedure_code, source.place_of_service,\n    source.primary_procedure_modifier_code, source.revenue_center_code,\n    source.claim_facility_type, source.drg_code,\n    source.admission_type, source.admission_type_name, source.admit_source_code, source.admit_source_name,\n    source.payer_id, source.payer_name, source.plan_id, source.plan_name, source.plan_type,\n    source.servicing_provider_key, source.servicing_provider_npi,\n    source.tax_id, source.tax_org_name, source.ordering_provider_npi,\n    source.ordering_provider_key, source.attending_provider_key,\n    source.total_claim_amount, source.total_insurance_paid_amount, source.allowed_amount_header,\n    source.co_pay, source.coinsurance_amount, source.noncovered_amount, source.discount_amount,\n    source.BENEFIT_PAYABLE, source.cob_amount, source.deductible,\n    source.line_claim_amount, source.allowed_amount, source.line_eligible_amount,\n    source.line_insurance_paid_amount, source.line_paidtoprovider_amount,\n    source.line_member_paid_amount, source.line_memberliability_amount,\n    source.line_paidbypatient_amount, source.line_discount_amount,\n    source.line_co_pay, source.line_coinsurance_pay, source.line_deductible,\n    source.line_noncovered_amount, source.line_cob_paid_amount, source.line_priorpayerpaid_amount,\n    source.denial_reason_code, source.line_denial_reason_code, source.denial_reason_description_key,\n    source.adjustment_reason, source.adjustment_status, source.payee_type, source.transaction_id,\n    GETUTCDATE()\n);\n"
+                                }
+                            ],
+                            "scriptBlockExecutionTimeout": "02:00:00"
+                        }
+                    },
+                    {
+                        "name": "DeduplicateStaging",
+                        "type": "Script",
+                        "dependsOn": [
+                            {
+                                "activity": "CopyToStaging",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.12:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "linkedServiceName": {
+                            "referenceName": "AzureSqlDatabase1",
+                            "type": "LinkedServiceReference"
+                        },
+                        "typeProperties": {
+                            "scripts": [
+                                {
+                                    "type": "NonQuery",
+                                    "text": "WITH CTE_DEDUP AS (\n    SELECT\n        ROW_NUMBER() OVER (\n            PARTITION BY claim_id, claim_line_id\n            ORDER BY source_record_date DESC, CLAIM_FACT_KEY DESC\n        ) AS rn\n    FROM dbo.medical_claims_staging\n)\nDELETE FROM CTE_DEDUP WHERE rn > 1;"
+                                }
+                            ],
+                            "scriptBlockExecutionTimeout": "02:00:00"
+                        }
+                    }
+                ],
+                "policy": {
+                    "elapsedTimeMetric": {}
+                },
+                "annotations": [],
+                "lastPublishTime": "2026-05-08T10:08:31Z"
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/datasets/DS_RunLog')]",
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]",
+                "[concat(variables('factoryId'), '/datasets/DS_MedicalClaims_Staging')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/Filter_UM_AUTH')]",
+            "type": "Microsoft.DataFactory/factories/dataflows",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "type": "MappingDataFlow",
+                "typeProperties": {
+                    "sources": [
+                        {
+                            "dataset": {
+                                "referenceName": "Excel1",
+                                "type": "DatasetReference"
+                            },
+                            "name": "source1"
+                        }
+                    ],
+                    "sinks": [
+                        {
+                            "dataset": {
+                                "referenceName": "AzureSqlTable2",
+                                "type": "DatasetReference"
+                            },
+                            "name": "sink1",
+                            "rejectedDataLinkedService": {
+                                "referenceName": "AzureBlobStorage1",
+                                "type": "LinkedServiceReference"
+                            }
+                        }
+                    ],
+                    "transformations": [
+                        {
+                            "name": "filter1"
+                        }
+                    ],
+                    "scriptLines": [
+                        "source(output(",
+                        "          Schema as string,",
+                        "          TableName as string,",
+                        "          ColumnName as string,",
+                        "          DataType as string,",
+                        "          Innovaccer_UDM_Column as string,",
+                        "          FHIR_Element as string",
+                        "     ),",
+                        "     allowSchemaDrift: true,",
+                        "     validateSchema: false,",
+                        "     ignoreNoFilesFound: false) ~> source1",
+                        "source1 filter(TableName == \"UM_AUTH\") ~> filter1",
+                        "filter1 sink(allowSchemaDrift: true,",
+                        "     validateSchema: false,",
+                        "     input(",
+                        "          SchemaName as string,",
+                        "          TableName as string,",
+                        "          ColumnName as string,",
+                        "          DataType as string,",
+                        "          Innovaccer_UDM_Column as string,",
+                        "          FHIR_Element as string",
+                        "     ),",
+                        "     deletable:false,",
+                        "     insertable:true,",
+                        "     updateable:false,",
+                        "     upsertable:false,",
+                        "     format: 'table',",
+                        "     skipDuplicateMapInputs: true,",
+                        "     skipDuplicateMapOutputs: true,",
+                        "     errorHandlingOption: 'stopOnFirstError',",
+                        "     mapColumn(",
+                        "          SchemaName = Schema,",
+                        "          TableName,",
+                        "          ColumnName,",
+                        "          DataType,",
+                        "          Innovaccer_UDM_Column,",
+                        "          FHIR_Element",
+                        "     )) ~> sink1"
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/datasets/Excel1')]",
+                "[concat(variables('factoryId'), '/datasets/AzureSqlTable2')]",
+                "[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobStorage",
+                "typeProperties": {
+                    "connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/SourceSqlDB')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureSqlDatabase",
+                "typeProperties": {
+                    "server": "[parameters('SourceSqlDB_properties_typeProperties_server')]",
+                    "database": "[parameters('SourceSqlDB_properties_typeProperties_database')]",
+                    "encrypt": "optional",
+                    "trustServerCertificate": false,
+                    "authenticationType": "SQL",
+                    "userName": "[parameters('SourceSqlDB_properties_typeProperties_userName')]",
+                    "password": {
+                        "type": "SecureString",
+                        "value": "[parameters('SourceSqlDB_password')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/TargetSqlDB')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureSqlDatabase",
+                "typeProperties": {
+                    "server": "[parameters('TargetSqlDB_properties_typeProperties_server')]",
+                    "database": "[parameters('TargetSqlDB_properties_typeProperties_database')]",
+                    "encrypt": "optional",
+                    "trustServerCertificate": false,
+                    "authenticationType": "SQL",
+                    "userName": "[parameters('TargetSqlDB_properties_typeProperties_userName')]",
+                    "password": {
+                        "type": "SecureString",
+                        "value": "[parameters('TargetSqlDB_password')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureKey')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureKeyVault",
+                "typeProperties": {
+                    "baseUrl": "[parameters('AzureKey_properties_typeProperties_baseUrl')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureSqlDatabase1')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureSqlDatabase",
+                "typeProperties": {
+                    "server": "[parameters('AzureSqlDatabase1_properties_typeProperties_server')]",
+                    "database": "[parameters('AzureSqlDatabase1_properties_typeProperties_database')]",
+                    "encrypt": "mandatory",
+                    "trustServerCertificate": false,
+                    "authenticationType": "SQL",
+                    "userName": "[parameters('AzureSqlDatabase1_properties_typeProperties_userName')]",
+                    "password": {
+                        "type": "SecureString",
+                        "value": "[parameters('AzureSqlDatabase1_password')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/Excel1')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureBlobStorage1",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "Excel",
+                "typeProperties": {
+                    "sheetName": "PriorAuth FHIR Mapping",
+                    "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "container": "um-gcd1"
+                    },
+                    "firstRowAsHeader": true
+                },
+                "schema": [
+                    {
+                        "type": "String"
+                    },
+                    {
+                        "type": "String"
+                    },
+                    {
+                        "type": "String"
+                    },
+                    {
+                        "type": "String"
+                    },
+                    {
+                        "type": "String"
+                    },
+                    {
+                        "type": "String"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureSqlTbl')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "TargetSqlDB",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "AUTH_ID",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "ALTERNATE_AUTH_ID",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "AUTH_TYPE_ID",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "CLAIM_TYPE_ID",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "CERTIFICATION_TYPE_ID",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "DETERMINATION_TYPE_ID",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "TREATMENT_TYPE_ID",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "ADMISSION_SOURCE_ID",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "PATIENT_ID",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "LOB_BEN_ID",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "MEM_BENF_PLAN_ID",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "AUTH_FROM_DATE",
+                        "type": "datetime",
+                        "precision": 23,
+                        "scale": 3
+                    },
+                    {
+                        "name": "AUTH_EXP_DISCH_DATE",
+                        "type": "datetime",
+                        "precision": 23,
+                        "scale": 3
+                    },
+                    {
+                        "name": "AUTH_DATE_NOTED",
+                        "type": "datetime",
+                        "precision": 23,
+                        "scale": 3
+                    },
+                    {
+                        "name": "AUTH_NOTI_DATE",
+                        "type": "datetime",
+                        "precision": 23,
+                        "scale": 3
+                    },
+                    {
+                        "name": "AUTH_ACT_DISCH_DATE",
+                        "type": "datetime",
+                        "precision": 23,
+                        "scale": 3
+                    },
+                    {
+                        "name": "AUTH_CLOSED_DATE",
+                        "type": "datetime",
+                        "precision": 23,
+                        "scale": 3
+                    },
+                    {
+                        "name": "MEMBER_NOTIFICATION_DATE",
+                        "type": "datetime",
+                        "precision": 23,
+                        "scale": 3
+                    },
+                    {
+                        "name": "REQUEST_SENT_MODE",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "OUT_OF_AREA_INDICATOR_ID",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "AUTH_DAYS_SUPPLIED",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "AUTH_STRENGTH",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "AUTH_REFILLS_REQUESTED",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "DISCHARGE_TO_ID",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "AUTH_STATUS_ID",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "AUTH_STATUS_REASON_ID",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "AUTH_PRIORITY_ID",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "REQUESTED_UNITS",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "APPROVED_UNITS",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "AUTH_USED_UNITS",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "UM_AUTH_MAPPING"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/TargetSqlDB')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureSqlTable2')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "TargetSqlDB",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "SchemaName",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "TableName",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "ColumnName",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "DataType",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "Innovaccer_UDM_Column",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "FHIR_Element",
+                        "type": "varchar"
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "UM_AUTH_MAPPING"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/TargetSqlDB')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_MedicalClaims_Target')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabase1",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "claim_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_line_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "CLAIM_FACT_KEY",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "claim_use",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "insurance_focal",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "claim_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_type_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "BILLING_FACILITY_TYPE",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_payment_status",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "local_member_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "first_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "last_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "gender",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "birth_date",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "source_record_date",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_submission_date",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_adjudication_date",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_payment_date",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_processing_date",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "first_date_of_header_service",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "last_date_of_header_service",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "first_date_of_line_service",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "last_date_of_line_service",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admit_date",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "discharge_date",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "active_since_date",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "active_till_date",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "diagnosis",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "procedure_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "place_of_service",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "primary_procedure_modifier_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "revenue_center_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_facility_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "drg_code",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "admission_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admission_type_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admit_source_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admit_source_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payer_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payer_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "servicing_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "servicing_provider_npi",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "tax_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "tax_org_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "ordering_provider_npi",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "ordering_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "attending_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "total_claim_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "total_insurance_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "allowed_amount_header",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "co_pay",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "coinsurance_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "noncovered_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "discount_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "BENEFIT_PAYABLE",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "cob_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "deductible",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_claim_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "allowed_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_eligible_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_insurance_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_paidtoprovider_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_member_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_memberliability_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_paidbypatient_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_discount_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_co_pay",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_coinsurance_pay",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_deductible",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_noncovered_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_cob_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_priorpayerpaid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "denial_reason_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "line_denial_reason_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "denial_reason_description_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "adjustment_reason",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "adjustment_status",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payee_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "transaction_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "adf_load_datetime",
+                        "type": "datetime2",
+                        "scale": 7
+                    },
+                    {
+                        "name": "adf_pipeline_run_id",
+                        "type": "nvarchar"
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "medical_claims"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_MedicalClaims_View')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabase1",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "claim_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_line_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "CLAIM_FACT_KEY",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "claim_use",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "insurance_focal",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "claim_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_type_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "BILLING_FACILITY_TYPE",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_payment_status",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "local_member_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "first_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "last_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "gender",
+                        "type": "char"
+                    },
+                    {
+                        "name": "birth_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "source_record_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "claim_submission_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "claim_adjudication_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "claim_payment_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "claim_processing_date",
+                        "type": "datetime2",
+                        "scale": 7
+                    },
+                    {
+                        "name": "first_date_of_header_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "last_date_of_header_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "first_date_of_line_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "last_date_of_line_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "admit_date",
+                        "type": "datetime2",
+                        "scale": 7
+                    },
+                    {
+                        "name": "discharge_date",
+                        "type": "datetime2",
+                        "scale": 7
+                    },
+                    {
+                        "name": "active_since_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "active_till_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "diagnosis",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "procedure_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "place_of_service",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "primary_procedure_modifier_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "revenue_center_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_facility_type",
+                        "type": "char"
+                    },
+                    {
+                        "name": "drg_code",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "admission_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admission_type_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admit_source_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admit_source_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payer_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payer_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "servicing_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "servicing_provider_npi",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "tax_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "tax_org_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "ordering_provider_npi",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "ordering_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "attending_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "total_claim_amount",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "total_insurance_paid_amount",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "allowed_amount_header",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "co_pay",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "coinsurance_amount",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "noncovered_amount",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "discount_amount",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "BENEFIT_PAYABLE",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "cob_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "deductible",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_claim_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "allowed_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_eligible_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_insurance_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_paidtoprovider_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_member_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_memberliability_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_paidbypatient_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_discount_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_co_pay",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_coinsurance_pay",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_deductible",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_noncovered_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_cob_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_priorpayerpaid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "denial_reason_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "line_denial_reason_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "denial_reason_description_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "adjustment_reason",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "adjustment_status",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payee_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "transaction_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "RN",
+                        "type": "bigint",
+                        "precision": 19
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "vw_innovaccer_medical_claims"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_MedicalClaims_Staging')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabase1",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "claim_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_line_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "CLAIM_FACT_KEY",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "claim_use",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "insurance_focal",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_type_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "BILLING_FACILITY_TYPE",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_payment_status",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "local_member_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "first_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "last_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "gender",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "birth_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "source_record_date",
+                        "type": "datetime2",
+                        "scale": 7
+                    },
+                    {
+                        "name": "claim_submission_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "claim_adjudication_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "claim_payment_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "claim_processing_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "first_date_of_header_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "last_date_of_header_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "first_date_of_line_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "last_date_of_line_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "admit_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "discharge_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "active_since_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "active_till_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "diagnosis",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "procedure_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "place_of_service",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "primary_procedure_modifier_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "revenue_center_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_facility_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "drg_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admission_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admission_type_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admit_source_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admit_source_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payer_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payer_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "servicing_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "servicing_provider_npi",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "tax_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "tax_org_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "ordering_provider_npi",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "ordering_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "attending_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "total_claim_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "total_insurance_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "allowed_amount_header",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "co_pay",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "coinsurance_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "noncovered_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "discount_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "BENEFIT_PAYABLE",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "cob_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "deductible",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_claim_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "allowed_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_eligible_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_insurance_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_paidtoprovider_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_member_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_memberliability_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_paidbypatient_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_discount_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_co_pay",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_coinsurance_pay",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_deductible",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_noncovered_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_cob_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_priorpayerpaid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "denial_reason_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "line_denial_reason_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "denial_reason_description_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "adjustment_reason",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "adjustment_status",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payee_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "transaction_id",
+                        "type": "nvarchar"
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "medical_claims_staging"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_vw_MedicalClaims')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabase1",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "claim_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_line_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "CLAIM_FACT_KEY",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "claim_use",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "insurance_focal",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "claim_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_type_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "BILLING_FACILITY_TYPE",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_payment_status",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "local_member_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "first_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "last_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "gender",
+                        "type": "char"
+                    },
+                    {
+                        "name": "birth_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "source_record_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "claim_submission_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "claim_adjudication_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "claim_payment_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "claim_processing_date",
+                        "type": "datetime2",
+                        "scale": 7
+                    },
+                    {
+                        "name": "first_date_of_header_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "last_date_of_header_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "first_date_of_line_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "last_date_of_line_service",
+                        "type": "date"
+                    },
+                    {
+                        "name": "admit_date",
+                        "type": "datetime2",
+                        "scale": 7
+                    },
+                    {
+                        "name": "discharge_date",
+                        "type": "datetime2",
+                        "scale": 7
+                    },
+                    {
+                        "name": "active_since_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "active_till_date",
+                        "type": "date"
+                    },
+                    {
+                        "name": "diagnosis",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "procedure_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "place_of_service",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "primary_procedure_modifier_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "revenue_center_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "claim_facility_type",
+                        "type": "char"
+                    },
+                    {
+                        "name": "drg_code",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "admission_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admission_type_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admit_source_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "admit_source_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payer_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payer_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "plan_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "servicing_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "servicing_provider_npi",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "tax_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "tax_org_name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "ordering_provider_npi",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "ordering_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "attending_provider_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "total_claim_amount",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "total_insurance_paid_amount",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "allowed_amount_header",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "co_pay",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "coinsurance_amount",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "noncovered_amount",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "discount_amount",
+                        "type": "decimal",
+                        "precision": 38,
+                        "scale": 2
+                    },
+                    {
+                        "name": "BENEFIT_PAYABLE",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "cob_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "deductible",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_claim_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "allowed_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_eligible_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_insurance_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_paidtoprovider_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_member_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_memberliability_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_paidbypatient_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_discount_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_co_pay",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_coinsurance_pay",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_deductible",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_noncovered_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_cob_paid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "line_priorpayerpaid_amount",
+                        "type": "decimal",
+                        "precision": 18,
+                        "scale": 2
+                    },
+                    {
+                        "name": "denial_reason_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "line_denial_reason_code",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "denial_reason_description_key",
+                        "type": "bigint",
+                        "precision": 19
+                    },
+                    {
+                        "name": "adjustment_reason",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "adjustment_status",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "payee_type",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "transaction_id",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "RN",
+                        "type": "bigint",
+                        "precision": 19
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "vw_innovaccer_medical_claims"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DS_RunLog')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabase1",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "pipeline_name",
+                        "type": "varchar"
+                    },
+                    {
+                        "name": "last_load_datetime",
+                        "type": "datetime2",
+                        "scale": 7
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "datetime2",
+                        "scale": 7
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "pipeline_run_log"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+            ]
+        }
+    ]
+}
